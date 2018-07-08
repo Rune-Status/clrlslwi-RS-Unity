@@ -191,7 +191,7 @@ namespace RS
             UnityEngine.Color[] color = new UnityEngine.Color[this.Width * this.Height];
             for (int i = 0; i < color.Length; i++)
             {
-                int rgb = this.Palette[this.Pixels[i]];
+                int rgb = Palette[Pixels[i]];
                 int r = rgb >> 16 & 0xFF;
                 int g = rgb >> 8 & 0xFF;
                 int b = rgb & 0xFF;

@@ -1474,7 +1474,6 @@ namespace RS
 
                             if (wall.Extension != null)
                             {
-                                Debug.Log("add extension???");
                                 GameObject extensionObj = new GameObject("WallExtension " + wall.UniqueId);
                                 
                                 wall.Extension.Backing = extensionObj;

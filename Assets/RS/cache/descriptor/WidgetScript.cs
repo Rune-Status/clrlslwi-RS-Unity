@@ -45,12 +45,32 @@ namespace RS
         public byte index;
         public int[] opcodes;
 
+        public WidgetScript()
+        {
+            
+        }
+
+        public WidgetScript(JagexBuffer b, int index)
+        {
+            this.index = (byte) index;
+            LoadFromBuffer(b);
+        }
+
+        private void LoadFromBuffer(JagexBuffer b)
+        {
+            opcodes = new int[b.ReadUShort()];
+            for (var i = 0; i < opcodes.Length; i++)
+            {
+                opcodes[i] = b.ReadUShort();
+            }
+        }
+
         public int Execute()
         {
             int returnValue = 0;
             int mathType = 0;
             int isntructionPointer = 0;
-            int[] instructions = this.opcodes;
+            int[] instructions = opcodes;
 
             do
             {

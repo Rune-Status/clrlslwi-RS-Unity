@@ -99,6 +99,7 @@ namespace RS
             cache.SeqFrameProvider = new SequenceFrameProvider();
             cache.SeqFrameProvider.Init(cache.FileVersions[1].Length, cache.AnimIndex.Length);
             cache.GraphicDescProvider = new GraphicDescriptorProvider(configArchive);
+            cache.WidgetConfigProvider = new WidgetConfigProvider(cache.GetArchive(3));
         }
 
         /// <summary>

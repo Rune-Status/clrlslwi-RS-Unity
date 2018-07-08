@@ -127,6 +127,10 @@
 
         public GraphicConfig Provide(int index)
         {
+            if (index < 0 || index>= instance.Length)
+            {
+                return null;
+            }
             return instance[index];
         }
     }

@@ -235,7 +235,6 @@ namespace RS
                             InBuffer.Position(0);
                             lastOpcode = InBuffer.ReadByte() - GameContext.InCipher.NextInt() & 0xFF;
                             lastSize = GameConstants.PacketSizes[lastOpcode];
-                            Debug.Log("Received opcode: " + lastOpcode + "," + lastSize);
                         }
 
                         if (lastSize == -1 || lastSize == -2)
@@ -252,16 +251,13 @@ namespace RS
                             InBuffer.WriteBytes(buffer, 0, lastSize == -1 ? 1 : 2);
                             InBuffer.Position(0);
                             lastSize = lastSize == -1 ? InBuffer.ReadUByte() : InBuffer.ReadUShort();
-
-                            Debug.Log("Received size: " + lastOpcode + "," + lastSize);
                         }
                         
                         if (client.Available < lastSize)
                         {
                             break;
                         }
-
-                        Debug.Log("Received pkt: " + lastOpcode + "," + lastSize);
+                        
                         var pbuffer = new byte[lastSize];
                         stream.Read(pbuffer, 0, pbuffer.Length);
                         var packet = new Packet(lastOpcode, pbuffer);

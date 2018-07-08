@@ -31,6 +31,7 @@ namespace RS
         public SequenceProvider SeqProvider;
         public SequenceFrameProvider SeqFrameProvider;
         public GraphicDescriptorProvider GraphicDescProvider;
+        public WidgetConfigProvider WidgetConfigProvider;
 
         /// <summary>
         /// A list of names of crc files.
@@ -422,7 +423,7 @@ namespace RS
 
         public WidgetConfig GetWidgetConfig(int index)
         {
-            return null;
+            return WidgetConfigProvider.Provide(index);
         }
 
         public GraphicConfig GetGraphicConfig(int index)

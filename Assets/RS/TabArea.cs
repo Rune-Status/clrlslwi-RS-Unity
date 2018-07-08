@@ -22,17 +22,6 @@ namespace RS
         /// The widget being rendered.
         /// </summary>
         public Widget TabWidget = null;
-        
-        /// <summary>
-        /// If the tabs are going to be stacked or not.
-        /// </summary>
-        public bool Stacked
-        {
-            get
-            {
-                return Camera.main.pixelWidth < 1000;
-            }
-        }
 
         /// <summary>
         /// Initializes the tab area.
@@ -43,21 +32,21 @@ namespace RS
             var redstone = ResourceCache.Redstone;
             var icons = ResourceCache.Icons;
 
-            Tabs[ptr] = new Tab(ptr++, "Combat", redstone[1], icons[0], 0, 0, 8, 7, 33, 36);
-            Tabs[ptr] = new Tab(ptr++, "Stats", redstone[1], icons[1], 0, 0, 3, 4, 33, 36);
-            Tabs[ptr] = new Tab(ptr++, "Quest", redstone[1], icons[2], 0, 0, 4, 5, 33, 36);
-            Tabs[ptr] = new Tab(ptr++, "Inventory", redstone[1], icons[3], 0, 0, 2, 2, 33, 36);
-            Tabs[ptr] = new Tab(ptr++, "Equipment", redstone[1], icons[4], 0, 0, 2, 1, 33, 36);
-            Tabs[ptr] = new Tab(ptr++, "Prayer", redstone[1], icons[5], 0, 0, 2, 2, 33, 36);
-            Tabs[ptr] = new Tab(ptr++, "Magic", redstone[1], icons[6], 0, 0, 2, 5, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "Combat", redstone[1], icons[0], 516 + 22, 160 + 10, 0, 0, 8, 7, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "Stats", redstone[1], icons[1], 516 + 54, 160 + 8, 0, 0, 3, 4, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "Quest", redstone[1], icons[2], 516 + 82, 160 + 8, 0, 0, 4, 5, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "Inventory", redstone[1], icons[3], 516 + 110, 160 + 8, 0, 0, 2, 2, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "Equipment", redstone[1], icons[4], 516 + 153, 160 + 8, 0, 0, 2, 1, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "Prayer", redstone[1], icons[5], 516 + 181, 160 + 8, 0, 0, 2, 2, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "Magic", redstone[1], icons[6], 516 + 209, 160 + 9, 0, 0, 2, 5, 33, 36);
 
-            Tabs[ptr] = new Tab(ptr++, "", redstone[1], icons[7], 0, 0, 4, 4, 33, 36);
-            Tabs[ptr] = new Tab(ptr++, "Friends", redstone[1], icons[8], 0, 0, 4, 4, 33, 36);
-            Tabs[ptr] = new Tab(ptr++, "Ignored", redstone[1], icons[9], 0, 0, 5, 4, 33, 36);
-            Tabs[ptr] = new Tab(ptr++, "Log out", redstone[1], icons[10], 0, 0, 4, 3, 33, 36);
-            Tabs[ptr] = new Tab(ptr++, "Settings", redstone[1], icons[11], 0, 0, 4, 4, 33, 36);
-            Tabs[ptr] = new Tab(ptr++, "Emotes", redstone[1], icons[12], 0, 0, 5, 2, 33, 36);
-            Tabs[ptr] = new Tab(ptr++, "", redstone[1], null, 0, 0, 0, 0, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "", redstone[1], icons[7], 496 + 42, 466 + 10, 0, 0, 4, 4, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "Friends", redstone[1], icons[8], 496 + 74, 466 + 10, 0, 0, 4, 4, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "Ignored", redstone[1], icons[9], 496 + 102, 466 + 10, 0, 0, 5, 4, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "Log out", redstone[1], icons[10], 496 + 130, 466 + 10, 0, 0, 4, 3, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "Settings", redstone[1], icons[11], 496 + 173, 466 + 10, 0, 0, 4, 4, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "Emotes", redstone[1], icons[12], 496 + 201, 466 + 10, 0, 0, 5, 2, 33, 36);
+            Tabs[ptr] = new Tab(ptr++, "", redstone[1], null, 496 + 229, 466 + 10, 0, 0, 0, 0, 33, 36);
         }
 
         /// <summary>

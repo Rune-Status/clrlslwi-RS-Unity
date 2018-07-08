@@ -64,7 +64,7 @@ namespace RS
         /// </summary>
         private Widget cachedWidget;
 
-        public Tab(int index, string name, Texture2D redstone, Texture2D icon, int redstoneOffX, int redstoneOffY, int iconOffX, int iconOffY, int width, int height)
+        public Tab(int index, string name, Texture2D redstone, Texture2D icon, int x, int y, int redstoneOffX, int redstoneOffY, int iconOffX, int iconOffY, int width, int height)
         {
             this.index.Value = index;
             Name = name;
@@ -74,6 +74,8 @@ namespace RS
             IconOffY = iconOffY;
             this.redstone = redstone;
             this.icon = icon;
+            X = x;
+            Y = y;
             Width = width;
             Height = height;
         }
@@ -136,7 +138,7 @@ namespace RS
         {
             if (icon != null && widgetId.Value > 0)
             {
-                GUI.DrawTexture(new Rect(X + IconOffX, Y + IconOffY, icon.width, icon.height), icon);
+                Graphics.DrawTexture(new Rect(X + IconOffX, Y + IconOffY, icon.width, icon.height), icon);
             }
         }
 
@@ -147,7 +149,7 @@ namespace RS
         {
             if (redstone != null)
             {
-                GUI.DrawTexture(new Rect(X + RedstoneOffX, Y + RedstoneOffY, redstone.width, redstone.height), redstone);
+                Graphics.DrawTexture(new Rect(X + RedstoneOffX, Y + RedstoneOffY, redstone.width, redstone.height), redstone);
             }
         }
 

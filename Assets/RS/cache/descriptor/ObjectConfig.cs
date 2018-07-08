@@ -479,6 +479,8 @@ namespace RS
                 }
             }
 
+           // model.ApplyLighting(64 + brightness, 768 + specular * 5, -50, -10, -50, !flatShading);
+
             cachedModels.Add(uid, model);
             return model;
         }

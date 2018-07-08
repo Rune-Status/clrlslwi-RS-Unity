@@ -149,6 +149,7 @@ namespace RS
         {
             if (Visible)
             {
+                Debug.Log("Render!");
                 var tmp = CalculateHovered();
                 if (lastHovered != tmp)
                 {

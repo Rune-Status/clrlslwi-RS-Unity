@@ -248,7 +248,6 @@ namespace RS
         /// </summary>
         public int[] TextureScaleZ;
         sbyte[] TextureVertexPointers = null;
-        sbyte[] TriangleTextureMapTypes = null;
         sbyte[] aByteArray2851 = null;
         sbyte[] aByteArray2870 = null;
         sbyte[] aByteArray2859 = null;
@@ -290,7 +289,7 @@ namespace RS
         /// </summary>
         private List<ModelAttachment> attachmentQueue = new List<ModelAttachment>();
 
-        
+
 
         public Model()
         {
@@ -319,488 +318,9 @@ namespace RS
             normalUseCount[normalCount] = refCount;
             return normalCount++;
         }
-
-        /// <summary>
-        /// Loads a model from v2 format.
-        /// </summary>
-        /// <param name="index">The index of the model being loaded.</param>
-        public void LoadNewModel1(int index)
-        {
-            var data = modelBufferCache[index];
-            var colorStream = new DefaultJagexBuffer(data);
-            var typeStream = new DefaultJagexBuffer(data);
-            var priorityStream = new DefaultJagexBuffer(data);
-            var alphaStream = new DefaultJagexBuffer(data);
-            var tskinStream = new DefaultJagexBuffer(data);
-            var nc6 = new DefaultJagexBuffer(data);
-            var nc7 = new DefaultJagexBuffer(data);
-            colorStream.Position(data.Length - 23);
-            VertexCount = colorStream.ReadUShort();
-            TriangleCount = colorStream.ReadUShort();
-            TexturedTriangleCount = colorStream.ReadUByte();
-
-            var infoMask = colorStream.ReadUByte();
-            var hasTriangleInfo = (infoMask & 1) == 1;
-            var hasFormat = (infoMask & 8) == 8;
-            if (hasFormat)
-            {
-                colorStream.Position(colorStream.Position() - 7);
-                Format = colorStream.ReadUByte();
-                colorStream.Position(colorStream.Position() + 6);
-            }
-
-            var priority = colorStream.ReadUByte();
-            var hasAlpha = colorStream.ReadUByte();
-            var hasSkins = colorStream.ReadUByte();
-            var hasFaceTextures = colorStream.ReadUByte();
-            var hasVertexSkins = colorStream.ReadUByte();
-            var j3 = colorStream.ReadUShort();
-            var k3 = colorStream.ReadUShort();
-            var l3 = colorStream.ReadUShort();
-            var i4 = colorStream.ReadUShort();
-            var j4 = colorStream.ReadUShort();
-            var simpleTextureFaceCount = 0;
-            var complexTextureFaceCount = 0;
-            var cubeTextureFaceCount = 0;
-
-            TriangleColor = new int[TriangleCount];
-            if (TexturedTriangleCount > 0)
-            {
-                TriangleTextureMapTypes = new sbyte[TexturedTriangleCount];
-                colorStream.Position(0);
-                for (int j5 = 0; j5 < TexturedTriangleCount; j5++)
-                {
-                    sbyte type = TriangleTextureMapTypes[j5] = (sbyte)colorStream.ReadByte();
-                    if (type == 0)
-                    {
-                        simpleTextureFaceCount++;
-                    }
-
-                    if (type >= 1 && type <= 3)
-                    {
-                        complexTextureFaceCount++;
-                    }
-
-                    if (type == 2)
-                    {
-                        cubeTextureFaceCount++;
-                    }
-                }
-            }
-
-            var curPointer = TexturedTriangleCount;
-            var l5 = curPointer;
-            curPointer += VertexCount;
-            int typeStreamPos = curPointer;
-            if (hasTriangleInfo)
-            {
-                curPointer += TriangleCount;
-            }
-
-            var triangleViewspaceTypePos = curPointer;
-            curPointer += TriangleCount;
-            var priorityStreamPos = curPointer;
-            if (priority == 255)
-            {
-                curPointer += TriangleCount;
-            }
-
-            var tskinStreamPos = curPointer;
-            if (hasSkins == 1)
-            {
-                curPointer += TriangleCount;
-            }
-
-            var i7 = curPointer;
-            if (hasVertexSkins == 1)
-            {
-                curPointer += VertexCount;
-            }
-
-            var alphaStreamPos = curPointer;
-            if (hasAlpha == 1)
-            {
-                curPointer += TriangleCount;
-            }
-
-            var triangleViewspacePos = curPointer;
-            curPointer += i4;
-            var l7 = curPointer;
-            if (hasFaceTextures == 1)
-            {
-                curPointer += TriangleCount * 2;
-            }
-
-            var i8 = curPointer;
-            curPointer += j4;
-            var colorStreamPos = curPointer;
-            curPointer += TriangleCount * 2;
-            var k8 = curPointer;
-            curPointer += j3;
-            var l8 = curPointer;
-            curPointer += k3;
-            var i9 = curPointer;
-            curPointer += l3;
-            var fuckmyass = curPointer;
-            curPointer += simpleTextureFaceCount * 6;
-            var k9 = curPointer;
-            curPointer += complexTextureFaceCount * 6;
-            var i_59_ = 6;
-
-            if (Format != 14)
-            {
-                if (Format >= 15)
-                {
-                    i_59_ = 9;
-                }
-
-            }
-            else
-            {
-                i_59_ = 7;
-            }
-
-            var l9 = curPointer;
-            curPointer += i_59_ * complexTextureFaceCount;
-            var i10 = curPointer;
-            curPointer += complexTextureFaceCount;
-            var j10 = curPointer;
-            curPointer += complexTextureFaceCount;
-            var k10 = curPointer;
-            curPointer += complexTextureFaceCount + (cubeTextureFaceCount * 2);
-
-            VertexX = new int[VertexCount];
-            VertexY = new int[VertexCount];
-            VertexZ = new int[VertexCount];
-
-            TriangleViewspaceA = new int[TriangleCount];
-            TriangleViewspaceB = new int[TriangleCount];
-            TriangleViewspaceC = new int[TriangleCount];
-
-            VertexSkinTypes = new int[VertexCount];
-
-            TriangleInfo = new int[TriangleCount];
-            TrianglePriority = new int[TriangleCount];
-            TriangleAlpha = new int[TriangleCount];
-            TriangleTSkin = new int[TriangleCount];
-
-            if (hasVertexSkins == 1)
-            {
-                VertexSkinTypes = new int[VertexCount];
-            }
-
-            if (hasTriangleInfo)
-            {
-                TriangleInfo = new int[TriangleCount];
-            }
-
-            if (priority == 255)
-            {
-                TrianglePriority = new int[TriangleCount];
-            }
-
-            if (hasAlpha == 1)
-            {
-                TriangleAlpha = new int[TriangleCount];
-            }
-
-            if (hasSkins == 1)
-            {
-                TriangleTSkin = new int[TriangleCount];
-            }
-
-            if (hasFaceTextures == 1)
-            {
-                TriangleTextures = new int[TriangleCount];
-            }
-
-            if (hasFaceTextures == 1)
-            {
-                TextureVertexPointers = new sbyte[TriangleCount];
-            }
-
-            TriangleColor = new int[TriangleCount];
-            if (TexturedTriangleCount > 0)
-            {
-                TextureMapX = new int[TexturedTriangleCount];
-                TextureMapY = new int[TexturedTriangleCount];
-                TextureMapZ = new int[TexturedTriangleCount];
-
-                if (complexTextureFaceCount > 0)
-                {
-                    TextureScaleX = new int[complexTextureFaceCount];
-                    TextureScaleY = new int[complexTextureFaceCount];
-                    TextureScaleZ = new int[complexTextureFaceCount];
-                    TextureRotationY = new sbyte[complexTextureFaceCount];
-                    aByteArray2888 = new sbyte[complexTextureFaceCount];
-                    aByteArray2870 = new sbyte[complexTextureFaceCount];
-                }
-                if (cubeTextureFaceCount > 0)
-                {
-                    aByteArray2859 = new sbyte[cubeTextureFaceCount];
-                    aByteArray2851 = new sbyte[cubeTextureFaceCount];
-                }
-            }
-            colorStream.Position(l5);
-            typeStream.Position(k8);
-            priorityStream.Position(l8);
-            alphaStream.Position(i9);
-            tskinStream.Position(i7);
-
-            var lastX = 0;
-            var lastY = 0;
-            var lastZ = 0;
-            for (var v = 0; v < VertexCount; v++)
-            {
-                var mask = colorStream.ReadUByte();
-
-                var offX = 0;
-                if ((mask & 1) != 0)
-                {
-                    offX = typeStream.ReadSmart();
-                }
-
-                var offY = 0;
-                if ((mask & 2) != 0)
-                {
-                    offY = priorityStream.ReadSmart();
-                }
-
-                var offZ = 0;
-                if ((mask & 4) != 0)
-                {
-                    offZ = alphaStream.ReadSmart();
-                }
-
-                VertexX[v] = lastX + offX;
-                VertexY[v] = lastY + offY;
-                VertexZ[v] = lastZ + offZ;
-                lastX = VertexX[v];
-                lastY = VertexY[v];
-                lastZ = VertexZ[v];
-                if (hasVertexSkins == 1)
-                {
-                    VertexSkinTypes[v] = tskinStream.ReadUByte();
-                }
-            }
-
-            colorStream.Position(colorStreamPos);
-            typeStream.Position(typeStreamPos);
-            priorityStream.Position(priorityStreamPos);
-            alphaStream.Position(alphaStreamPos);
-            tskinStream.Position(tskinStreamPos);
-            nc6.Position(l7);
-            nc7.Position(i8);
-            for (var i = 0; i < TriangleCount; i++)
-            {
-                TriangleColor[i] = colorStream.ReadUShort();
-                if (hasTriangleInfo)
-                {
-                    TriangleInfo[i] = (sbyte)typeStream.ReadByte();
-                }
-
-                if (priority == 255)
-                {
-                    TrianglePriority[i] = (sbyte)priorityStream.ReadByte();
-                }
-
-                if (hasAlpha == 1)
-                {
-                    TriangleAlpha[i] = alphaStream.ReadUByte();
-                }
-
-                if (hasSkins == 1)
-                {
-                    TriangleTSkin[i] = tskinStream.ReadUByte();
-                }
-
-                if (hasFaceTextures == 1)
-                {
-                    TriangleTextures[i] = (short)(nc6.ReadUShort() - 1);
-                }
-
-                if (TextureVertexPointers != null)
-                {
-                    if (TriangleTextures[i] != -1)
-                    {
-                        TextureVertexPointers[i] = (sbyte)(nc7.ReadUByte() - 1);
-                    }
-                    else
-                    {
-                        TextureVertexPointers[i] = -1;
-                    }
-                }
-            }
-
-            colorStream.Position(triangleViewspacePos);
-            typeStream.Position(triangleViewspaceTypePos);
-            var x = 0;
-            var y = 0;
-            var z = 0;
-            var last = 0;
-            for (int i = 0; i < TriangleCount; i++)
-            {
-                var type = typeStream.ReadUByte();
-                if (type == 1)
-                {
-                    x = colorStream.ReadSmart() + last;
-                    last = x;
-
-                    y = colorStream.ReadSmart() + last;
-                    last = y;
-
-                    z = colorStream.ReadSmart() + last;
-                    last = z;
-
-                    TriangleViewspaceA[i] = x;
-                    TriangleViewspaceB[i] = y;
-                    TriangleViewspaceC[i] = z;
-                } else if (type == 2)
-                {
-                    y = z;
-                    z = colorStream.ReadSmart() + last;
-                    last = z;
-
-                    TriangleViewspaceA[i] = x;
-                    TriangleViewspaceB[i] = y;
-                    TriangleViewspaceC[i] = z;
-                } else if (type == 3)
-                {
-                    x = z;
-                    z = colorStream.ReadSmart() + last;
-                    last = z;
-
-                    TriangleViewspaceA[i] = x;
-                    TriangleViewspaceB[i] = y;
-                    TriangleViewspaceC[i] = z;
-                } else if (type == 4)
-                {
-                    int l14 = x;
-                    x = y;
-                    y = l14;
-                    z = colorStream.ReadSmart() + last;
-                    last = z;
-                    TriangleViewspaceA[i] = x;
-                    TriangleViewspaceB[i] = y;
-                    TriangleViewspaceC[i] = z;
-                }
-            }
-
-            colorStream.Position(fuckmyass);
-            typeStream.Position(k9);
-            priorityStream.Position(l9);
-            alphaStream.Position(i10);
-            tskinStream.Position(j10);
-            nc6.Position(k10);
-            for (var k14 = 0; k14 < TexturedTriangleCount; k14++)
-            {
-                var type = TriangleTextureMapTypes[k14] & 0xff;
-                if (type == 0)
-                {
-                    TextureMapX[k14] = (short)colorStream.ReadUShort();
-                    TextureMapY[k14] = (short)colorStream.ReadUShort();
-                    TextureMapZ[k14] = (short)colorStream.ReadUShort();
-                } else if (type == 1)
-                {
-                    TextureMapX[k14] = (short)typeStream.ReadUShort();
-                    TextureMapY[k14] = (short)typeStream.ReadUShort();
-                    TextureMapZ[k14] = (short)typeStream.ReadUShort();
-                    if (Format < 15)
-                    {
-                        TextureScaleX[k14] = priorityStream.ReadUShort();
-                        if (Format >= 14)
-                        {
-                            TextureScaleY[k14] = priorityStream.ReadTriByte();
-                        }
-                        else
-                        {
-                            TextureScaleY[k14] = priorityStream.ReadUShort();
-                        }
-                        TextureScaleZ[k14] = priorityStream.ReadUShort();
-                    }
-                    else
-                    {
-                        TextureScaleX[k14] = priorityStream.ReadTriByte();
-                        TextureScaleY[k14] = priorityStream.ReadTriByte();
-                        TextureScaleZ[k14] = priorityStream.ReadTriByte();
-                    }
-
-                    TextureRotationY[k14] = (sbyte)alphaStream.ReadByte();
-                    aByteArray2888[k14] = (sbyte)tskinStream.ReadByte();
-                    aByteArray2870[k14] = (sbyte)nc6.ReadByte();
-                } else if (type == 2)
-                {
-                    TextureMapX[k14] = (short)typeStream.ReadUShort();
-                    TextureMapY[k14] = (short)typeStream.ReadUShort();
-                    TextureMapZ[k14] = (short)typeStream.ReadUShort();
-                    if (Format >= 15)
-                    {
-                        TextureScaleX[k14] = priorityStream.ReadTriByte();
-                        TextureScaleY[k14] = priorityStream.ReadTriByte();
-                        TextureScaleZ[k14] = priorityStream.ReadTriByte();
-                    }
-                    else
-                    {
-                        TextureScaleX[k14] = priorityStream.ReadUShort();
-                        if (Format < 14)
-                        {
-                            TextureScaleY[k14] = priorityStream.ReadUShort();
-                        }
-                        else
-                        {
-                            TextureScaleY[k14] = priorityStream.ReadTriByte();
-                        }
-                        TextureScaleZ[k14] = priorityStream.ReadUShort();
-                    }
-                    TextureRotationY[k14] = (sbyte)alphaStream.ReadByte();
-                    aByteArray2888[k14] = (sbyte)tskinStream.ReadByte();
-                    aByteArray2870[k14] = (sbyte)nc6.ReadByte();
-                    aByteArray2859[k14] = (sbyte)nc6.ReadByte();
-                    aByteArray2851[k14] = (sbyte)nc6.ReadByte();
-                } else if (type == 3)
-                {
-                    TextureMapX[k14] = (short)typeStream.ReadUShort();
-                    TextureMapY[k14] = (short)typeStream.ReadUShort();
-                    TextureMapZ[k14] = (short)typeStream.ReadUShort();
-                    if (Format < 15)
-                    {
-                        TextureScaleX[k14] = priorityStream.ReadUShort();
-                        if (Format < 14)
-                        {
-                            TextureScaleY[k14] = priorityStream.ReadUShort();
-                        }
-                        else
-                        {
-                            TextureScaleY[k14] = priorityStream.ReadTriByte();
-                        }
-                        TextureScaleZ[k14] = priorityStream.ReadUShort();
-                    }
-                    else
-                    {
-                        TextureScaleX[k14] = priorityStream.ReadTriByte();
-                        TextureScaleY[k14] = priorityStream.ReadTriByte();
-                        TextureScaleZ[k14] = priorityStream.ReadTriByte();
-                    }
-
-                    TextureRotationY[k14] = (sbyte)alphaStream.ReadByte();
-                    aByteArray2888[k14] = (sbyte)tskinStream.ReadByte();
-                    aByteArray2870[k14] = (sbyte)nc6.ReadByte();
-                }
-            }
-
-            if (Format > 13)
-            {
-                ScaleDivide(4);
-            }
-
-            FilterTriangles();
-        }
-
+        
         public void LoadOldModel(int index)
         {
-            var hasValidTriangleInfo = false;
-            var hasValidTriangleTexture = false;
-
             var data = modelBufferCache[index];
             var buffer = new DefaultJagexBuffer(data);
             buffer.Position(data.Length - 18);
@@ -809,7 +329,6 @@ namespace RS
             var triangleCount = buffer.ReadUShort();
             var texturedTriangleCount = buffer.ReadUByte();
             
-
             var hasTextures = buffer.ReadUByte();
             var priority = buffer.ReadUByte();
             var hasAlpha = buffer.ReadUByte();
@@ -839,7 +358,6 @@ namespace RS
             }
 
             var tskinStreamPos = position;
-
             if (hasSkins == 1)
             {
                 position += triangleCount;
@@ -850,7 +368,6 @@ namespace RS
             }
 
             var infoStreamPos = position;
-
             if (hasTextures == 1)
             {
                 position += triangleCount;
@@ -861,7 +378,6 @@ namespace RS
             }
 
             var tskinFlagStreamPos = position;
-
             if (hasVertexSkins == 1)
             {
                 position += vertexCount;
@@ -902,10 +418,6 @@ namespace RS
             VertexCount = vertexCount;
             TriangleCount = triangleCount;
             TexturedTriangleCount = texturedTriangleCount;
-            if (TexturedTriangleCount > 0)
-            {
-                TriangleTextureMapTypes = new sbyte[TexturedTriangleCount];
-            }
 
             VertexX = new int[VertexCount];
             VertexY = new int[VertexCount];
@@ -1012,36 +524,9 @@ namespace RS
             for (var i = 0; i < TriangleCount; i++)
             {
                 TriangleColor[i] = colorStream.ReadUShort();
-                if (hasTextures == 1)
+                if (TriangleInfo != null)
                 {
-                    var renderFlag = typeStream.ReadUByte();
-                    if ((renderFlag & 1) == 1)
-                    {
-                        TriangleInfo[i] = 1;
-                        hasValidTriangleInfo = true;
-                    }
-                    else
-                    {
-                        TriangleInfo[i] = 0;
-                    }
-
-                    if ((renderFlag & 2) == 1)
-                    {
-                        TextureVertexPointers[i] = (sbyte)(renderFlag >> 2);
-                        TriangleTextures[i] = TriangleColor[i];
-                        TriangleColor[i] = 127;
-                        if (TriangleTextures[i] != -1)
-                        {
-                            hasValidTriangleTexture = true;
-                        }
-                    }
-                    else
-                    {
-                        if (TextureVertexPointers != null)
-                            TextureVertexPointers[i] = -1;
-                        if (TriangleTextures != null)
-                            TriangleTextures[i] = -1;
-                    }
+                    TriangleInfo[i] = typeStream.ReadUByte();
                 }
 
                 if (TrianglePriority != null)
@@ -1085,7 +570,8 @@ namespace RS
                     TriangleViewspaceA[i] = x;
                     TriangleViewspaceB[i] = y;
                     TriangleViewspaceC[i] = z;
-                } else if (type == 2)
+                }
+                else if (type == 2)
                 {
                     y = z;
 
@@ -1095,7 +581,8 @@ namespace RS
                     TriangleViewspaceA[i] = x;
                     TriangleViewspaceB[i] = y;
                     TriangleViewspaceC[i] = z;
-                } else if (type == 3)
+                }
+                else if (type == 3)
                 {
                     x = z;
 
@@ -1105,7 +592,8 @@ namespace RS
                     TriangleViewspaceA[i] = x;
                     TriangleViewspaceB[i] = y;
                     TriangleViewspaceC[i] = z;
-                } else if (type == 4)
+                }
+                else if (type == 4)
                 {
                     var tmp = x;
                     x = y;
@@ -1123,46 +611,11 @@ namespace RS
             colorStream.Position(textureMapStreamPos);
             for (var i = 0; i < TexturedTriangleCount; i++)
             {
-                TriangleTextureMapTypes[i] = 0;
                 TextureMapX[i] = colorStream.ReadUShort();
                 TextureMapY[i] = colorStream.ReadUShort();
                 TextureMapZ[i] = colorStream.ReadUShort();
             }
-
-            if (TextureVertexPointers != null)
-            {
-                var hasValidTextureVertPtrs = false;
-                for (int i = 0; i < triangleCount; i++)
-                {
-                    var tmi = TextureVertexPointers[i] & 0xff;
-                    if (tmi != 255)
-                    {
-                        if ((TextureMapX[tmi] & 0xffff) == TriangleViewspaceA[i] 
-                            && (TextureMapY[tmi] & 0xffff) == TriangleViewspaceB[i] 
-                            && (TextureMapZ[tmi] & 0xffff) == TriangleViewspaceC[i])
-                        {
-                            TextureVertexPointers[i] = -1;
-                        }
-                        else
-                        {
-                            hasValidTextureVertPtrs = true;
-                        }
-                    }
-                }
-                if (!hasValidTextureVertPtrs)
-                {
-                    TextureVertexPointers = null;
-                }
-            }
-
-            if (!hasValidTriangleTexture)
-            {
-                TriangleTextures = null;
-            }
-            if (!hasValidTriangleInfo)
-            {
-                TriangleInfo = null;
-            }
+            
         }
 
         public Model(int index)
@@ -1230,7 +683,6 @@ namespace RS
             TriangleCount = m.TriangleCount;
 
             TexturedTriangleCount = m.TexturedTriangleCount;
-            TriangleTextureMapTypes = m.TriangleTextureMapTypes;
             TextureScaleX = m.TextureScaleX;
             TextureScaleY = m.TextureScaleY;
             TextureScaleZ = m.TextureScaleZ;
@@ -1373,7 +825,6 @@ namespace RS
             aByteArray2870 = m.aByteArray2870;
             aByteArray2888 = m.aByteArray2888;
             TexturedTriangleCount = m.TexturedTriangleCount;
-            TriangleTextureMapTypes = m.TriangleTextureMapTypes;
             TextureScaleX = m.TextureScaleX;
             TextureScaleY = m.TextureScaleY;
             TextureScaleZ = m.TextureScaleZ;
@@ -1475,7 +926,6 @@ namespace RS
 
             if (TexturedTriangleCount > 0)
             {
-                TriangleTextureMapTypes = new sbyte[TexturedTriangleCount];
                 TextureMapX = new int[TexturedTriangleCount];
                 TextureMapY = new int[TexturedTriangleCount];
                 TextureMapZ = new int[TexturedTriangleCount];
@@ -1568,30 +1018,9 @@ namespace RS
 
                     for (int j = 0; j < m.TexturedTriangleCount; j++)
                     {
-                        sbyte type = (TriangleTextureMapTypes[TexturedTriangleCount] = m.TriangleTextureMapTypes[j]);
-                        if (type == 0)
-                        {
-                            TextureMapX[TexturedTriangleCount] = InsertVertexFrom(m, m.TextureMapX[j]);
-                            TextureMapY[TexturedTriangleCount] = InsertVertexFrom(m, m.TextureMapY[j]);
-                            TextureMapZ[TexturedTriangleCount] = InsertVertexFrom(m, m.TextureMapZ[j]);
-                        }
-                        if (type >= 1 && type <= 3)
-                        {
-                            TextureMapX[TexturedTriangleCount] = m.TextureMapX[j];
-                            TextureMapY[TexturedTriangleCount] = m.TextureMapY[j];
-                            TextureMapZ[TexturedTriangleCount] = m.TextureMapZ[j];
-                            TextureScaleX[TexturedTriangleCount] = m.TextureScaleX[j];
-                            TextureScaleY[TexturedTriangleCount] = m.TextureScaleY[j];
-                            TextureScaleZ[TexturedTriangleCount] = m.TextureScaleZ[j];
-                            TextureRotationY[TexturedTriangleCount] = m.TextureRotationY[j];
-                            aByteArray2888[TexturedTriangleCount] = m.aByteArray2888[j];
-                            aByteArray2870[TexturedTriangleCount] = m.aByteArray2870[j];
-                        }
-                        if (type == 2)
-                        {
-                            aByteArray2859[TexturedTriangleCount] = m.aByteArray2859[j];
-                            aByteArray2851[TexturedTriangleCount] = m.aByteArray2851[j];
-                        }
+                        TextureMapX[TexturedTriangleCount] = InsertVertexFrom(m, m.TextureMapX[j]);
+                        TextureMapY[TexturedTriangleCount] = InsertVertexFrom(m, m.TextureMapY[j]);
+                        TextureMapZ[TexturedTriangleCount] = InsertVertexFrom(m, m.TextureMapZ[j]);
                         TexturedTriangleCount++;
                     }
                 }
@@ -2165,9 +1594,6 @@ namespace RS
             }
             attachmentQueue.Clear();
 
-            var scaleFactor = 3.0f / 768;
-            var baseScale = 3.0f / (768 + 768 / 2);
-
             for (var i = 0; i < TriangleCount; i++)
             {
                 var type = 0;
@@ -2176,48 +1602,24 @@ namespace RS
                     type = TriangleInfo[i];
                 }
 
-                if (type == 0)
+                if ((type & 1) == 0)
                 {
                     var normalA = actualNormal[TriangleViewspaceA[i]];
-                    if (normalA.ReuseCount == 0)
-                    {
-                        normals.Add(new Vector3(normalA.X * baseScale, normalA.Y * baseScale, normalA.Z * baseScale));
-                    }
-                    else
-                    {
-                        var scale = scaleFactor / normalA.ReuseCount;
-                        normals.Add(new Vector3(normalA.X * scale, normalA.Y * scale, normalA.Z * scale));
-                    }
+                    normals.Add(new Vector3(normalA.X, normalA.Y, normalA.Z));
 
                     var normalB = actualNormal[TriangleViewspaceB[i]];
-                    if (normalB.ReuseCount == 0)
-                    {
-                        normals.Add(new Vector3(normalB.X * baseScale, normalB.Y * baseScale, normalB.Z * baseScale));
-                    }
-                    else
-                    {
-                        var scale = scaleFactor / normalB.ReuseCount;
-                        normals.Add(new Vector3(normalB.X * scale, normalB.Y * scale, normalB.Z * scale));
-                    }
+                    normals.Add(new Vector3(normalB.X, normalB.Y, normalB.Z));
 
                     var normalC = actualNormal[TriangleViewspaceC[i]];
-                    if (normalC.ReuseCount == 0)
-                    {
-                        normals.Add(new Vector3(normalC.X * baseScale, normalC.Y * baseScale, normalC.Z * baseScale));
-                    }
-                    else
-                    {
-                        var scale = scaleFactor / normalC.ReuseCount;
-                        normals.Add(new Vector3(normalC.X * scale, normalC.Y * scale, normalC.Z * scale));
-                    }
+                    normals.Add(new Vector3(normalC.X, normalC.Y, normalC.Z));
                 }
-                else if (type == 1)
+                /*else if (type == 1)
                 {
                     var normalA = actualNormal2[i];
                     normals.Add(new Vector3(normalA.X * baseScale, normalA.Y * baseScale, normalA.Z * baseScale));
                     normals.Add(new Vector3(normalA.X * baseScale, normalA.Y * baseScale, normalA.Z * baseScale));
                     normals.Add(new Vector3(normalA.X * baseScale, normalA.Y * baseScale, normalA.Z * baseScale));
-                }
+                }*/
                 else
                 {
                     normals.Add(new Vector3(1, 1, 1));
@@ -2245,7 +1647,8 @@ namespace RS
                 if (cycle2 != 2)
                 {
                     cycle1 = cycle2;
-                } else
+                }
+                else
                 {
                     cycle1 = 1;
                 }
@@ -2253,7 +1656,7 @@ namespace RS
 
             if (VertexWeights != null && seqIndex != -1)
             {
-                
+
                 var frame = GameContext.Cache.GetSeqFrame(seqIndex);
                 if (frame != null)
                 {
@@ -2272,14 +1675,14 @@ namespace RS
                         }
                     }
 
-                    if (nextFrame == null)
-                    {
+                    /*if (nextFrame == null)
+                    {*/
                         for (var i = 0; i < frame.FrameCount; i++)
                         {
                             int v = frame.Vertices[i];
                             Transform(transformList.Opcodes[v], transformList.Vertices[v], frame.VertexX[i], frame.VertexY[i], frame.VertexZ[i]);
                         }
-                    }
+                    /*}
                     else
                     {
                         var curFrameId = 0;
@@ -2340,44 +1743,52 @@ namespace RS
                                     nextAnimZ = defaultModifier;
                                 }
 
-                                int interpolatedX;
-                                int interpolatedY;
-                                int interpolatedZ;
-                                if (opcode == 2)
+                                int interpolatedX = curAnimX;
+                                int interpolatedY = curAnimY;
+                                int interpolatedZ = curAnimZ;
+                                var cappedCycle = cycle1 & 0xFF;
+                                if (cappedCycle != 0)
                                 {
-                                    int deltaX = nextAnimX - curAnimX & 0xff;
-                                    int deltaY = nextAnimY - curAnimY & 0xff;
-                                    int deltaZ = nextAnimZ - curAnimZ & 0xff;
-                                    if (deltaX >= 128)
+                                    if (opcode == 2)
                                     {
-                                        deltaX -= 256;
-                                    }
+                                        int deltaX = nextAnimX - cappedCycle;
+                                        int deltaY = nextAnimY - cappedCycle;
+                                        int deltaZ = nextAnimZ - cappedCycle;
+                                        if (deltaX >= 128)
+                                        {
+                                            deltaX -= 256;
+                                        }
 
-                                    if (deltaY >= 128)
+                                        if (deltaY >= 128)
+                                        {
+                                            deltaY -= 256;
+                                        }
+
+                                        if (deltaZ >= 128)
+                                        {
+                                            deltaZ -= 256;
+                                        }
+
+                                        interpolatedX = (curAnimX + deltaX * cycle2) / cappedCycle;
+                                        interpolatedY = (curAnimY + deltaY * cycle2) / cappedCycle;
+                                        interpolatedZ = (curAnimZ + deltaZ * cycle2) / cappedCycle;
+                                    }
+                                    else
                                     {
-                                        deltaY -= 256;
+                                        interpolatedX = curAnimX + (nextAnimX - curAnimX) * cycle2 / cappedCycle;
+                                        interpolatedY = curAnimY + (nextAnimY - curAnimY) * cycle2 / cappedCycle;
+                                        interpolatedZ = curAnimZ + (nextAnimZ - curAnimZ) * cycle2 / cappedCycle;
                                     }
-
-                                    if (deltaZ >= 128)
-                                    {
-                                        deltaZ -= 256;
-                                    }
-
-                                    interpolatedX = curAnimX + deltaX * cycle2 / cycle1 & 0xff;
-                                    interpolatedY = curAnimY + deltaY * cycle2 / cycle1 & 0xff;
-                                    interpolatedZ = curAnimZ + deltaZ * cycle2 / cycle1 & 0xff;
                                 }
                                 else
                                 {
-                                    interpolatedX = curAnimX + (nextAnimX - curAnimX) * cycle2 / cycle1;
-                                    interpolatedY = curAnimY + (nextAnimY - curAnimY) * cycle2 / cycle1;
-                                    interpolatedZ = curAnimZ + (nextAnimZ - curAnimZ) * cycle2 / cycle1;
+
                                 }
 
                                 Transform(opcode, transformList.Vertices[i], interpolatedX, interpolatedY, interpolatedZ);
                             }
                         }
-                    }
+                    }*/
                 }
             }
 
@@ -2462,7 +1873,7 @@ namespace RS
             for (var frame = 0; frame < af2.FrameCount; frame++)
             {
                 int v;
-                for (v = af2.Vertices[frame]; v > vertex; vertex = vertices[position++]);
+                for (v = af2.Vertices[frame]; v > vertex; vertex = vertices[position++]) ;
                 if (v == vertex || slist.Opcodes[v] == 0)
                 {
                     Transform(slist.Opcodes[v], slist.Vertices[v], af2.VertexX[frame], af2.VertexY[frame], af2.VertexZ[frame]);
@@ -2584,13 +1995,13 @@ namespace RS
         {
             if (actualNormal == null)
             {
-                actualNormal = new VNormal[this.VertexCount];
-                for (var id = 0; id < this.VertexCount; id++)
+                actualNormal = new VNormal[VertexCount];
+                for (var id = 0; id < VertexCount; id++)
                 {
                     actualNormal[id] = new VNormal();
                 }
 
-                for (var id = 0; id < this.TriangleCount; id++)
+                for (var id = 0; id < TriangleCount; id++)
                 {
                     var tA = TriangleViewspaceA[id];
                     var tB = TriangleViewspaceB[id];
@@ -2611,7 +2022,7 @@ namespace RS
                         normalY >>= 1;
                     }
 
-                    var normalLength = (int)Math.Sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ);
+                    var normalLength = (int)Math.Sqrt((double)(normalX * normalX + normalY * normalY + normalZ * normalZ));
                     if (normalLength <= 0)
                     {
                         normalLength = 1;
@@ -2627,34 +2038,25 @@ namespace RS
                         type = TriangleInfo[id];
                     }
 
-                    if (type == 0)
+                    if ((type & 1) == 0)
                     {
-                        var normal = this.actualNormal[tA];
+                        var normal = actualNormal[tA];
                         normal.X += normalX;
                         normal.Y += normalY;
                         normal.Z += normalZ;
                         normal.ReuseCount++;
-                        normal = this.actualNormal[tB];
+                        normal = actualNormal[tB];
                         normal.X += normalX;
                         normal.Y += normalY;
                         normal.Z += normalZ;
                         normal.ReuseCount++;
-                        normal = this.actualNormal[tC];
+                        normal = actualNormal[tC];
                         normal.X += normalX;
                         normal.Y += normalY;
                         normal.Z += normalZ;
                         normal.ReuseCount++;
                     }
-                    else if (type == 1)
-                    {
-                        if (actualNormal2 == null)
-                            actualNormal2 = new VNormal[this.TriangleCount];
 
-                        var normal = actualNormal2[id] = new VNormal();
-                        normal.X = normalX;
-                        normal.Y = normalY;
-                        normal.Z = normalZ;
-                    }
                 }
             }
         }
@@ -2876,7 +2278,7 @@ namespace RS
             var normals = new Vector3[TriangleCount * 3];
             var normalPtr = 0;
 
-            
+
 
             var contrast = 768;
             var scaleFactor = 3.0f / contrast;
@@ -2890,7 +2292,7 @@ namespace RS
                     type = TriangleInfo[i];
                 }
 
-                if (type == 0)
+                if ((type & 1) == 0)
                 {
                     var normalA = actualNormal[TriangleViewspaceA[i]];
                     if (normalA.ReuseCount == 0)
@@ -2925,143 +2327,18 @@ namespace RS
                         normals[normalPtr++] = new Vector3(normalC.X * scale, normalC.Y * scale, normalC.Z * scale);
                     }
                 }
-                else if (type == 1)
-                {
-                    var normalA = actualNormal2[i];
-                    normals[normalPtr++] = new Vector3(normalA.X * baseScale, normalA.Y * baseScale, normalA.Z * baseScale);
-                    normals[normalPtr++] = new Vector3(normalA.X * baseScale, normalA.Y * baseScale, normalA.Z * baseScale);
-                    normals[normalPtr++] = new Vector3(normalA.X * baseScale, normalA.Y * baseScale, normalA.Z * baseScale);
-                }
+                /* else if (type == 1)
+                 {
+                     var normalA = actualNormal2[i];
+                     normals[normalPtr++] = new Vector3(normalA.X * baseScale, normalA.Y * baseScale, normalA.Z * baseScale);
+                     normals[normalPtr++] = new Vector3(normalA.X * baseScale, normalA.Y * baseScale, normalA.Z * baseScale);
+                     normals[normalPtr++] = new Vector3(normalA.X * baseScale, normalA.Y * baseScale, normalA.Z * baseScale);
+                 }*/
                 else
                 {
                     normals[normalPtr++] = new Vector3(1, 1, 1);
                     normals[normalPtr++] = new Vector3(1, 1, 1);
                     normals[normalPtr++] = new Vector3(1, 1, 1);
-                }
-            }
-
-            int[] is_734_ = null;
-            int[] is_735_ = null;
-            int[] is_736_ = null;
-            float[][] fs = null;
-            if (TextureVertexPointers != null)
-            {
-                int i_737_ = TexturedTriangleCount;
-                int[] is_738_ = new int[i_737_];
-                int[] is_739_ = new int[i_737_];
-                int[] is_740_ = new int[i_737_];
-                int[] is_741_ = new int[i_737_];
-                int[] is_742_ = new int[i_737_];
-                int[] is_743_ = new int[i_737_];
-                for (int i_744_ = 0; i_744_ < i_737_; i_744_++)
-                {
-                    is_738_[i_744_] = 2147483647;
-                    is_739_[i_744_] = -2147483647;
-                    is_740_[i_744_] = 2147483647;
-                    is_741_[i_744_] = -2147483647;
-                    is_742_[i_744_] = 2147483647;
-                    is_743_[i_744_] = -2147483647;
-                }
-                for (int i_745_ = 0; i_745_ < TriangleCount; i_745_++)
-                {
-                    int i_746_ = i_745_;
-                    if (TextureVertexPointers[i_746_] != -1)
-                    {
-                        int i_747_ = TextureVertexPointers[i_746_] & 0xff;
-                        for (int i_748_ = 0; i_748_ < 3; i_748_++)
-                        {
-                            int i_749_;
-                            if (i_748_ == 0)
-                            {
-                                i_749_ = TriangleViewspaceA[i_746_];
-                            }
-                            else if (i_748_ == 1)
-                            {
-                                i_749_ = TriangleViewspaceB[i_746_];
-                            }
-                            else
-                            {
-                                i_749_ = TriangleViewspaceC[i_746_];
-                            }
-                            int i_750_ = VertexX[i_749_];
-                            int i_751_ = VertexY[i_749_];
-                            int i_752_ = VertexZ[i_749_];
-                            if (i_750_ < is_738_[i_747_])
-                            {
-                                is_738_[i_747_] = i_750_;
-                            }
-                            if (i_750_ > is_739_[i_747_])
-                            {
-                                is_739_[i_747_] = i_750_;
-                            }
-                            if (i_751_ < is_740_[i_747_])
-                            {
-                                is_740_[i_747_] = i_751_;
-                            }
-                            if (i_751_ > is_741_[i_747_])
-                            {
-                                is_741_[i_747_] = i_751_;
-                            }
-                            if (i_752_ < is_742_[i_747_])
-                            {
-                                is_742_[i_747_] = i_752_;
-                            }
-                            if (i_752_ > is_743_[i_747_])
-                            {
-                                is_743_[i_747_] = i_752_;
-                            }
-                        }
-                    }
-                }
-                is_734_ = new int[i_737_];
-                is_735_ = new int[i_737_];
-                is_736_ = new int[i_737_];
-                fs = new float[i_737_][];
-                for (int i_753_ = 0; i_753_ < i_737_; i_753_++)
-                {
-                    var i_754_ = TriangleTextureMapTypes[i_753_];
-                    if (i_754_ > 0)
-                    {
-                        is_734_[i_753_] = (is_738_[i_753_] + is_739_[i_753_]) / 2;
-                        is_735_[i_753_] = (is_740_[i_753_] + is_741_[i_753_]) / 2;
-                        is_736_[i_753_] = (is_742_[i_753_] + is_743_[i_753_]) / 2;
-                        float f;
-                        float f_755_;
-                        float f_756_;
-                        if (i_754_ == 1)
-                        {
-                            var i_757_ = TextureScaleX[i_753_];
-                            if (i_757_ == 0)
-                            {
-                                f = 1.0F;
-                                f_756_ = 1.0F;
-                            }
-                            else if (i_757_ > 0)
-                            {
-                                f = 1.0F;
-                                f_756_ = i_757_ / 1024.0F;
-                            }
-                            else
-                            {
-                                f_756_ = 1.0F;
-                                f = -i_757_ / 1024.0F;
-                            }
-                            f_755_ = 64.0F / (TextureScaleY[i_753_] & 0xffff);
-                        }
-                        else if (i_754_ == 2)
-                        {
-                            f = 64.0F / (TextureScaleX[i_753_] & 0xffff);
-                            f_755_ = 64.0F / (TextureScaleY[i_753_] & 0xffff);
-                            f_756_ = 64.0F / (TextureScaleZ[i_753_] & 0xffff);
-                        }
-                        else
-                        {
-                            f = TextureScaleX[i_753_] / 1024.0F;
-                            f_755_ = TextureScaleY[i_753_] / 1024.0F;
-                            f_756_ = TextureScaleZ[i_753_] / 1024.0F;
-                        }
-                        fs[i_753_] = ObfuscatedShit.method2424(TextureMapX[i_753_], TextureMapY[i_753_], TextureMapZ[i_753_], TextureRotationY[i_753_] & 0xff, f, f_755_, f_756_);
-                    }
                 }
             }
 
@@ -3071,18 +2348,19 @@ namespace RS
                 var type = RenderType.Colored;
                 var texture = -1;
 
-                if (TriangleTextures == null || TriangleTextures[i] == -1)
+                if (TriangleInfo != null && ((TriangleInfo[i] & 3) == 2 || (TriangleInfo[i] & 3) == 3))
                 {
-                    type = RenderType.Colored;
+
+                    type = RenderType.Textured;
+                    texture = TriangleColor[i];
                 }
                 else
                 {
-                    type = RenderType.Textured;
-                    texture = TriangleTextures[i];
+                    type = RenderType.Colored;
                 }
 
                 var texMapPos = -1;
-                if (type == RenderType.Textured)
+                if (TextureVertexPointers != null && type == RenderType.Textured)
                 {
                     texMapPos = TextureVertexPointers[i];
                 }
@@ -3126,225 +2404,58 @@ namespace RS
                     }
                     else
                     {
-                        texMapPos &= 0xFF;
-                        if (TriangleTextureMapTypes[texMapPos] == 0)
-                        {
-                            int tva = TriangleViewspaceA[i];
-                            int tvb = TriangleViewspaceB[i];
-                            int tvc = TriangleViewspaceC[i];
-                            int tmx = TextureMapX[texMapPos];
-                            int tmy = TextureMapY[texMapPos];
-                            int tmz = TextureMapZ[texMapPos];
+                        int tva = TriangleViewspaceA[i];
+                        int tvb = TriangleViewspaceB[i];
+                        int tvc = TriangleViewspaceC[i];
+                        int tmx = TextureMapX[texMapPos];
+                        int tmy = TextureMapY[texMapPos];
+                        int tmz = TextureMapZ[texMapPos];
 
-                            float f_779_ = VertexX[tmx];
-                            float f_780_ = VertexY[tmx];
-                            float f_781_ = VertexZ[tmx];
+                        float f_779_ = VertexX[tmx];
+                        float f_780_ = VertexY[tmx];
+                        float f_781_ = VertexZ[tmx];
 
-                            float f_782_ = VertexX[tmy] - f_779_;
-                            float f_783_ = VertexY[tmy] - f_780_;
-                            float f_784_ = VertexZ[tmy] - f_781_;
+                        float f_782_ = VertexX[tmy] - f_779_;
+                        float f_783_ = VertexY[tmy] - f_780_;
+                        float f_784_ = VertexZ[tmy] - f_781_;
 
-                            float f_785_ = VertexX[tmz] - f_779_;
-                            float f_786_ = VertexY[tmz] - f_780_;
-                            float f_787_ = VertexZ[tmz] - f_781_;
+                        float f_785_ = VertexX[tmz] - f_779_;
+                        float f_786_ = VertexY[tmz] - f_780_;
+                        float f_787_ = VertexZ[tmz] - f_781_;
 
-                            float f_788_ = VertexX[tva] - f_779_;
-                            float f_789_ = VertexY[tva] - f_780_;
-                            float f_790_ = VertexZ[tva] - f_781_;
+                        float f_788_ = VertexX[tva] - f_779_;
+                        float f_789_ = VertexY[tva] - f_780_;
+                        float f_790_ = VertexZ[tva] - f_781_;
 
-                            float f_791_ = VertexX[tvb] - f_779_;
-                            float f_792_ = VertexY[tvb] - f_780_;
-                            float f_793_ = VertexZ[tvb] - f_781_;
+                        float f_791_ = VertexX[tvb] - f_779_;
+                        float f_792_ = VertexY[tvb] - f_780_;
+                        float f_793_ = VertexZ[tvb] - f_781_;
 
-                            float f_794_ = VertexX[tvc] - f_779_;
-                            float f_795_ = VertexY[tvc] - f_780_;
-                            float f_796_ = VertexZ[tvc] - f_781_;
+                        float f_794_ = VertexX[tvc] - f_779_;
+                        float f_795_ = VertexY[tvc] - f_780_;
+                        float f_796_ = VertexZ[tvc] - f_781_;
 
-                            float f_797_ = f_783_ * f_787_ - f_784_ * f_786_;
-                            float f_798_ = f_784_ * f_785_ - f_782_ * f_787_;
-                            float f_799_ = f_782_ * f_786_ - f_783_ * f_785_;
-                            float f_800_ = f_786_ * f_799_ - f_787_ * f_798_;
-                            float f_801_ = f_787_ * f_797_ - f_785_ * f_799_;
-                            float f_802_ = f_785_ * f_798_ - f_786_ * f_797_;
-                            float f_803_ = 1.0F / (f_800_ * f_782_ + f_801_ * f_783_ + f_802_ * f_784_);
-                            var aU = (f_800_ * f_788_ + f_801_ * f_789_ + f_802_ * f_790_) * f_803_;
-                            var bU = (f_800_ * f_791_ + f_801_ * f_792_ + f_802_ * f_793_) * f_803_;
-                            var cU = (f_800_ * f_794_ + f_801_ * f_795_ + f_802_ * f_796_) * f_803_;
-                            f_800_ = f_783_ * f_799_ - f_784_ * f_798_;
-                            f_801_ = f_784_ * f_797_ - f_782_ * f_799_;
-                            f_802_ = f_782_ * f_798_ - f_783_ * f_797_;
-                            f_803_ = 1.0F / (f_800_ * f_785_ + f_801_ * f_786_ + f_802_ * f_787_);
-                            var aV = (f_800_ * f_788_ + f_801_ * f_789_ + f_802_ * f_790_) * f_803_;
-                            var bV = (f_800_ * f_791_ + f_801_ * f_792_ + f_802_ * f_793_) * f_803_;
-                            var cV = (f_800_ * f_794_ + f_801_ * f_795_ + f_802_ * f_796_) * f_803_;
+                        float f_797_ = f_783_ * f_787_ - f_784_ * f_786_;
+                        float f_798_ = f_784_ * f_785_ - f_782_ * f_787_;
+                        float f_799_ = f_782_ * f_786_ - f_783_ * f_785_;
+                        float f_800_ = f_786_ * f_799_ - f_787_ * f_798_;
+                        float f_801_ = f_787_ * f_797_ - f_785_ * f_799_;
+                        float f_802_ = f_785_ * f_798_ - f_786_ * f_797_;
+                        float f_803_ = 1.0F / (f_800_ * f_782_ + f_801_ * f_783_ + f_802_ * f_784_);
+                        var aU = (f_800_ * f_788_ + f_801_ * f_789_ + f_802_ * f_790_) * f_803_;
+                        var bU = (f_800_ * f_791_ + f_801_ * f_792_ + f_802_ * f_793_) * f_803_;
+                        var cU = (f_800_ * f_794_ + f_801_ * f_795_ + f_802_ * f_796_) * f_803_;
+                        f_800_ = f_783_ * f_799_ - f_784_ * f_798_;
+                        f_801_ = f_784_ * f_797_ - f_782_ * f_799_;
+                        f_802_ = f_782_ * f_798_ - f_783_ * f_797_;
+                        f_803_ = 1.0F / (f_800_ * f_785_ + f_801_ * f_786_ + f_802_ * f_787_);
+                        var aV = (f_800_ * f_788_ + f_801_ * f_789_ + f_802_ * f_790_) * f_803_;
+                        var bV = (f_800_ * f_791_ + f_801_ * f_792_ + f_802_ * f_793_) * f_803_;
+                        var cV = (f_800_ * f_794_ + f_801_ * f_795_ + f_802_ * f_796_) * f_803_;
 
-                            uvs.Add(new Vector2(aU >= 1 ? 1f : aU, aV >= 1 ? 1f : aV));
-                            uvs.Add(new Vector2(bU >= 1 ? 1f : bU, bV >= 1 ? 1f : bV));
-                            uvs.Add(new Vector2(cU >= 1 ? 1f : cU, cV >= 1 ? 1f : cV));
-                        }
-                        else
-                        {
-                            var i_807_ = is_734_[texMapPos];
-                            var i_808_ = is_735_[texMapPos];
-                            var i_809_ = is_736_[texMapPos];
-                            var fs_810_ = fs[texMapPos];
-                            var i_811_ = aByteArray2888[texMapPos];
-                            var f_812_ = aByteArray2870[texMapPos] / 256.0F;
-
-                            if (TriangleTextureMapTypes[texMapPos] == 2)
-                            {
-                                float f_815_ = aByteArray2859[texMapPos] / 256.0F;
-                                float f_816_ = aByteArray2851[texMapPos] / 256.0F;
-                                int i_817_ = VertexX[idx2] - VertexX[idx1];
-                                int i_818_ = VertexY[idx2] - VertexY[idx1];
-                                int i_819_ = VertexZ[idx2] - VertexZ[idx1];
-                                int i_820_ = VertexX[idx3] - VertexX[idx1];
-                                int i_821_ = VertexY[idx3] - VertexY[idx1];
-                                int i_822_ = VertexZ[idx3] - VertexZ[idx1];
-                                int i_823_ = i_818_ * i_822_ - i_821_ * i_819_;
-                                int i_824_ = i_819_ * i_820_ - i_822_ * i_817_;
-                                int i_825_ = i_817_ * i_821_ - i_820_ * i_818_;
-                                float f_826_ = 64.0F / (TextureScaleX[texMapPos] & 0xffff);
-                                float f_827_ = 64.0F / (TextureScaleY[texMapPos] & 0xffff);
-                                float f_828_ = 64.0F / (TextureScaleZ[texMapPos] & 0xffff);
-                                float f_829_ = (i_823_ * fs_810_[0] + i_824_ * fs_810_[1] + i_825_ * fs_810_[2]) / f_826_;
-                                float f_830_ = (i_823_ * fs_810_[3] + i_824_ * fs_810_[4] + i_825_ * fs_810_[5]) / f_827_;
-                                float f_831_ = (i_823_ * fs_810_[6] + i_824_ * fs_810_[7] + i_825_ * fs_810_[8]) / f_828_;
-                                var i_771_ = ObfuscatedShit.method2437(f_829_, f_830_, f_831_);
-                                ObfuscatedShit.method2416(VertexX[idx1], VertexY[idx1], VertexZ[idx1], i_807_, i_808_, i_809_, i_771_, fs_810_, i_811_, f_812_, f_815_, f_816_);
-                                var aU = ObfuscatedShit.tmpUMapping1;
-                                var aV = ObfuscatedShit.tmpVMapping1;
-                                ObfuscatedShit.method2416(VertexX[idx2], VertexY[idx2], VertexZ[idx2], i_807_, i_808_, i_809_, i_771_, fs_810_, i_811_, f_812_, f_815_, f_816_);
-                                var bU = ObfuscatedShit.tmpUMapping1;
-                                var bV = ObfuscatedShit.tmpVMapping1;
-                                ObfuscatedShit.method2416(VertexX[idx3], VertexY[idx3], VertexZ[idx3], i_807_, i_808_, i_809_, i_771_, fs_810_, i_811_, f_812_, f_815_, f_816_);
-                                var cU = ObfuscatedShit.tmpUMapping1;
-                                var cV = ObfuscatedShit.tmpVMapping1;
-
-                                uvs.Add(new Vector2(aU >= 1 ? 1f : aU, aV >= 1 ? 1f : aV));
-                                uvs.Add(new Vector2(bU >= 1 ? 1f : bU, bV >= 1 ? 1f : bV));
-                                uvs.Add(new Vector2(cU >= 1 ? 1f : cU, cV >= 1 ? 1f : cV));
-
-
-                            }
-                            else if (TriangleTextureMapTypes[texMapPos] == 1)
-                            {
-                                float f_813_ = (TextureScaleZ[texMapPos] & 0xffff) / 1024.0F;
-                                ObfuscatedShit.method2431(VertexX[idx1], VertexY[idx1], VertexZ[idx1], i_807_, i_808_, i_809_, fs_810_, f_813_, i_811_, f_812_);
-                                var aU = ObfuscatedShit.aFloat3899;
-                                var aV = ObfuscatedShit.aFloat3903;
-                                ObfuscatedShit.method2431(VertexX[idx2], VertexY[idx2], VertexZ[idx2], i_807_, i_808_, i_809_, fs_810_, f_813_, i_811_, f_812_);
-                                var bU = ObfuscatedShit.aFloat3899;
-                                var bV = ObfuscatedShit.aFloat3903;
-                                ObfuscatedShit.method2431(VertexX[idx3], VertexY[idx3], VertexZ[idx3], i_807_, i_808_, i_809_, fs_810_, f_813_, i_811_, f_812_);
-                                var cU = ObfuscatedShit.aFloat3899;
-                                var cV = ObfuscatedShit.aFloat3903;
-                                float f_814_ = f_813_ / 2.0F;
-                                if ((i_811_ & 0x1) == 0)
-                                {
-                                    if (bU - aU > f_814_)
-                                    {
-                                        bU -= f_813_;
-                                    }
-                                    else if (aU - bU > f_814_)
-                                    {
-                                        bU += f_813_;
-                                    }
-                                    if (cU - aU > f_814_)
-                                    {
-                                        cU -= f_813_;
-                                    }
-                                    else if (aU - cU > f_814_)
-                                    {
-                                        cU += f_813_;
-                                    }
-                                }
-                                else
-                                {
-                                    if (bV - aV > f_814_)
-                                    {
-                                        bV -= f_813_;
-                                    }
-                                    else if (aV - bV > f_814_)
-                                    {
-                                        bV += f_813_;
-                                    }
-                                    if (cV - aV > f_814_)
-                                    {
-                                        cV -= f_813_;
-                                    }
-                                    else if (aV - cV > f_814_)
-                                    {
-                                        cV += f_813_;
-                                    }
-                                }
-
-                                uvs.Add(new Vector2(aU >= 1 ? 1f : aU, aV >= 1 ? 1f : aV));
-                                uvs.Add(new Vector2(bU >= 1 ? 1f : bU, bV >= 1 ? 1f : bV));
-                                uvs.Add(new Vector2(cU >= 1 ? 1f : cU, cV >= 1 ? 1f : cV));
-                            }
-                            else if (TriangleTextureMapTypes[texMapPos] == 3)
-                            {
-                                ObfuscatedShit.method2434(VertexX[idx1], VertexY[idx1], VertexZ[idx1], i_807_, i_808_, i_809_, fs_810_, i_811_, f_812_);
-                                var aU = ObfuscatedShit.aFloat3907;
-                                var aV = ObfuscatedShit.aFloat3902;
-                                ObfuscatedShit.method2434(VertexX[idx2], VertexY[idx2], VertexZ[idx2], i_807_, i_808_, i_809_, fs_810_, i_811_, f_812_);
-                                var bU = ObfuscatedShit.aFloat3907;
-                                var bV = ObfuscatedShit.aFloat3902;
-                                ObfuscatedShit.method2434(VertexX[idx3], VertexY[idx3], VertexZ[idx3], i_807_, i_808_, i_809_, fs_810_, i_811_, f_812_);
-                                var cU = ObfuscatedShit.aFloat3907;
-                                var cV = ObfuscatedShit.aFloat3902;
-                                if ((i_811_ & 0x1) == 0)
-                                {
-                                    if (bU - aU > 0.5F)
-                                    {
-                                        bU--;
-                                    }
-                                    else if (aU - bU > 0.5F)
-                                    {
-                                        bU++;
-                                    }
-                                    if (cU - aU > 0.5F)
-                                    {
-                                        cU--;
-                                    }
-                                    else if (aU - cU > 0.5F)
-                                    {
-                                        cU++;
-                                    }
-                                }
-                                else
-                                {
-                                    if (bV - aV > 0.5F)
-                                    {
-                                        bV--;
-                                    }
-                                    else if (aV - bV > 0.5F)
-                                    {
-                                        bV++;
-                                    }
-                                    if (cV - aV > 0.5F)
-                                    {
-                                        cV--;
-                                    }
-                                    else if (aV - cV > 0.5F)
-                                    {
-                                        cV++;
-                                    }
-                                }
-
-                                uvs.Add(new Vector2(aU >= 1 ? 1f : aU, aV >= 1 ? 1f : aV));
-                                uvs.Add(new Vector2(bU >= 1 ? 1f : bU, bV >= 1 ? 1f : bV));
-                                uvs.Add(new Vector2(cU >= 1 ? 1f : cU, cV >= 1 ? 1f : cV));
-                            }
-                            else
-                            {
-                                Debug.Log("unsupported type " + TriangleTextureMapTypes[texMapPos]);
-                                uvs.Add(new Vector2(0, 0));
-                                uvs.Add(new Vector2(0, 0));
-                                uvs.Add(new Vector2(0, 0));
-                            }
-                        }
+                        uvs.Add(new Vector2(aU >= 1 ? 1f : aU, aV >= 1 ? 1f : aV));
+                        uvs.Add(new Vector2(bU >= 1 ? 1f : bU, bV >= 1 ? 1f : bV));
+                        uvs.Add(new Vector2(cU >= 1 ? 1f : cU, cV >= 1 ? 1f : cV));
                     }
                 }
                 else
@@ -3400,7 +2511,7 @@ namespace RS
                         material.shader = ResourceCache.CutoutTransparentDiffuseShader;
                     }
 
-                    material.color = ColorUtils.RGBToColor(rgb, alpha);
+                    material.color = Color.white;
                     material.mainTexture = tex;
                 }
 
